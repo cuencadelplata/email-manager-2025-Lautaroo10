@@ -3,38 +3,38 @@ package com.mycompany.app;
 import java.util.List;
 
 public class Correo {
-    
+
     private String asunto;
     private String contenido;
-    private String remitente;
-    private List<String> destinatarios;
+    private Contacto remitente;
+    private List<Contacto> destinatarios;
 
-
-
-    public Correo(String asunto , String contenido , String remitente , List<String>destinatarios){
-        this.asunto=asunto;
-        this.contenido=contenido;
-        this.remitente=remitente;
-        this.destinatarios=destinatarios;
+    public Correo(String asunto, String contenido, Contacto remitente, List<Contacto> destinatarios) {
+        this.asunto = asunto;
+        this.contenido = contenido;
+        this.remitente = remitente;
+        this.destinatarios = destinatarios;
     }
 
-
-    public String getAsunto(){
+    public String getAsunto() {
         return asunto;
     }
 
-    public String getContenido(){
+    public String getContenido() {
         return contenido;
     }
 
-    public String getRemitente(){
+    public Contacto getRemitente() {
         return remitente;
     }
 
-    public List<String> getDestinatarios(){
+    public List<Contacto> getDestinatarios() {
         return destinatarios;
     }
+
+
     
+
 
 
 
