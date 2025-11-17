@@ -10,8 +10,8 @@ public class Usuario {
     private List<Correo> bandejaRecibidos = new ArrayList<>();
     private List<String> nombresFiltros = new ArrayList<>();
     private List<String> criteriosFiltros = new ArrayList<>();
-
-
+    private List<Correo> bandejaBorradores = new ArrayList<>();
+    private List<Correo> bandejaEliminados = new ArrayList<>();
 
 
     public Usuario(Contacto contacto){
@@ -37,45 +37,42 @@ public class Usuario {
         bandejaEnviados.add(correo);
     }
 
-
     public List<String> getNombresFiltros() {
     return nombresFiltros;
-}
+    }
+
+    public List<Correo> getBandejaBorradores() {
+        return bandejaBorradores;
+    }
+
+    public List<Correo> getBandejaEliminados() {
+        return bandejaEliminados;
+    }
 
 
-    public List<Correo> buscarCorreos(String textoBusqueda) {
-        List<Correo> resultados = new ArrayList<>();
+    public List<Correo> buscarEnBandejaEntrada(String textoBusqueda) {
+    List<Correo> resultados = new ArrayList<>();
 
-        if (textoBusqueda == null || textoBusqueda.isEmpty()) {
-            return resultados;
-        }
+    for (Correo correo : bandejaRecibidos) {
 
-        String texto = textoBusqueda.toLowerCase();
+        if (correo.getAsunto().contains(textoBusqueda)
+            || correo.getContenido().contains(textoBusqueda)
+            || correo.getRemitente().getNombre().contains(textoBusqueda)
+            || correo.getRemitente().getEmail().contains(textoBusqueda)) {
 
-        for (Correo correo : bandejaRecibidos) {
-            boolean coincide =
-                (correo.getAsunto() != null && correo.getAsunto().toLowerCase().contains(texto)) ||
-                (correo.getContenido() != null && correo.getContenido().toLowerCase().contains(texto)) ||
-                (correo.getRemitente() != null && correo.getRemitente().getNombre().toLowerCase().contains(texto)) ||
-                (correo.getRemitente() != null && correo.getRemitente().getEmail().toLowerCase().contains(texto));
-
-            // Buscar también en los destinatarios
-            if (!coincide && correo.getDestinatarios() != null) {
-                for (Contacto c : correo.getDestinatarios()) {
-                    if (c.getNombre().toLowerCase().contains(texto) || c.getEmail().toLowerCase().contains(texto)) {
-                        coincide = true;
-                        break;
-                    }
+            resultados.add(correo);
+        } else {
+            for (Contacto destinatario : correo.getDestinatarios()) {
+                if (destinatario.getNombre().contains(textoBusqueda) || destinatario.getEmail().contains(textoBusqueda)) {
+                    resultados.add(correo);
+                    break; 
                 }
             }
-
-            if (coincide) {
-                resultados.add(correo);
-            }
         }
-
-        return resultados;
     }
+
+    return resultados;
+    }   
 
 
 
@@ -135,6 +132,36 @@ public class Usuario {
 
 
 
+public void moverCorreo(List<Correo> origen, List<Correo> destino, Correo correo) {
+    if (origen.contains(correo)) {
+        origen.remove(correo);
+        destino.add(correo);
+    } else {
+        throw new IllegalArgumentException("El correo no existe en la bandeja origen.");
+    }
+}
+
+
+public void moverABorradores(Correo correo) {
+    moverCorreo(bandejaRecibidos, bandejaBorradores, correo);
+}
+
+
+public void eliminarCorreo(Correo correo) {
+    if (bandejaRecibidos.remove(correo) || bandejaEnviados.remove(correo) || bandejaBorradores.remove(correo)) {
+        bandejaEliminados.add(correo);
+    } else {
+        throw new IllegalArgumentException("El correo no existe en ninguna bandeja.");
+    }
+}
+
+
+public void restaurarCorreo(Correo correo) {
+    moverCorreo(bandejaEliminados, bandejaRecibidos, correo);
+}
 
 
 }
+
+
+

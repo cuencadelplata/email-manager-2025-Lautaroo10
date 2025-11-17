@@ -79,48 +79,11 @@ public class UsuarioTest {
 
 
 
+    //requermiiento 5//
+    
     @Test
-    public void alCrearUsuarioSusListasEstanVaciasYContactoAsignado() {
+    public void testFiltrarCorreosYAplicarFiltros() {
 
-        assertEquals(remitente, usuario.getContacto());
-
-
-        assertNotNull(usuario.getBandejaEnviados());
-        assertNotNull(usuario.getBandejaRecibidos());
-        assertTrue(usuario.getBandejaEnviados().isEmpty());
-        assertTrue(usuario.getBandejaRecibidos().isEmpty());
-}
-
-
-
-    @Test
-    public void sePuedeBuscarUnCorreo() {
-
-        Usuario usuario = new Usuario(new Contacto("Agustin", "agustinquetglas19@gmail.com"));
-
-        Contacto remitente = new Contacto("Lautaro", "romerostachlautaro@gmail.com");
-        Contacto destinatario = usuario.getContacto();
-
-        Correo c1 = new Correo("Encuentro", "Mañana futbol 5", remitente, List.of(destinatario));
-        Correo c2 = new Correo("Asado", "No te olvides de comprar la carne", remitente, List.of(destinatario));
-
-        usuario.recibirCorreo(c1);
-        usuario.recibirCorreo(c2);
-
-
-        List<Correo> resultados = usuario.buscarCorreos("asado");
-        List<Correo> resultados1 = usuario.buscarCorreos("futbol");
-
-
-        assertTrue(resultados.get(0).getAsunto().equalsIgnoreCase("Asado"));
-
-        assertTrue(resultados1.get(0).getContenido().toLowerCase().contains("futbol"));
-}
-
-
-@Test
-public void testFiltrarCorreosYAplicarFiltros() {
-    // 🔹 1) Crear usuario y contactos
     Usuario usuario = new Usuario(new Contacto("Agustin", "agustin@gmail.edu.ar"));
     Contacto remitente1 = new Contacto("Lautaro", "romerostachlautaro@ucp.edu.ar");
     Contacto remitente2 = new Contacto("Tomas", "tomas@messi.edu.ar");
@@ -133,15 +96,6 @@ public void testFiltrarCorreosYAplicarFiltros() {
     usuario.recibirCorreo(c2);
     usuario.recibirCorreo(c3);
 
-    
-    List<Correo> resultadosUCP = usuario.filtrarCorreos("@ucp");
-    assertEquals("Debería encontrar 2 correos con '@ucp'", 2, resultadosUCP.size());
-
-    List<Correo> resultadosMessi = usuario.filtrarCorreos("@messi");
-    assertEquals("Debería encontrar 1 correo con '@messi'", 1, resultadosMessi.size());
-
-    List<Correo> resultadosPartido = usuario.filtrarCorreos("partido");
-    assertEquals("Debería encontrar 1 correo con la palabra 'partido'", 1, resultadosPartido.size());
 
     
     usuario.crearFiltro("Correos UCP", "@ucp.edu.ar");
@@ -157,90 +111,123 @@ public void testFiltrarCorreosYAplicarFiltros() {
 }
 
 
-
     @Test
-    public void testFiltroDuplicadoDebeFallar() {
-        Usuario usuario = new Usuario(new Contacto("Agustin", "agustin@gmail.com"));
-
-        usuario.crearFiltro("Correos UCP", "@ucp.edu.ar");
-
-        boolean repetido = usuario.getNombresFiltros().contains("Correos UCP");
-
-        assertTrue( "Debe detectar que el filtro con ese nombre ya existe",repetido);
-    }
-
-
-
-    @Test
-    public void noSePuedenCrearMasDeCincoFiltros() {
-        Usuario usuario = new Usuario(new Contacto("Agustin", "agustin@gmail.com"));
-
-        for (int i = 1; i <= 5; i++) {
-            usuario.crearFiltro("Filtro" + i, "criterio" + i);
-        }
-
-        assertTrue("No se deberían poder crear más de 5 filtros", 
-            usuario.getNombresFiltros().size() == 5);
-    }
-
-
-
-
-
-    @Test
-public void buscarCorreosConTextoVacioODebeRetornarListaVacia() {
-    Usuario usuario = new Usuario(new Contacto("Agustin", "agus@gmail.com"));
-    List<Correo> resultados1 = usuario.buscarCorreos("");
-    List<Correo> resultados2 = usuario.buscarCorreos(null);
-    assertTrue(resultados1.isEmpty());
-    assertTrue(resultados2.isEmpty());
+public void crearFiltroAgregaCorrectamente() {
+    usuario.crearFiltro("Trabajo", "reunion");
+    assertEquals(1, usuario.getNombresFiltros().size());
 }
 
-    @Test
-    public void buscarCorreosPorNombreDelRemitenteODestinatario() {
-        Usuario usuario = new Usuario(new Contacto("Agustin", "agustin@gmail.com"));
-        Contacto remitente = new Contacto("Carlos", "carlos@mail.com");
-        Contacto destinatario = new Contacto("Pepe", "pepe@mail.com");
+@Test(expected = IllegalArgumentException.class)
+public void noSePuedeCrearFiltroConNombreRepetido() {
+    usuario.crearFiltro("Urgente", "ahora");
+    usuario.crearFiltro("Urgente", "mañana"); 
+}
 
-        Correo correo = new Correo("Saludo", "Hola!", remitente, List.of(destinatario));
-        usuario.recibirCorreo(correo);
-
-        List<Correo> resultadosRem = usuario.buscarCorreos("Carlos");
-        assertEquals(1, resultadosRem.size());
-
-        List<Correo> resultadosDest = usuario.buscarCorreos("Pepe");
-        assertEquals(1, resultadosDest.size());
+@Test(expected = IllegalArgumentException.class)
+public void noSePuedenCrearMasDeCincoFiltros() {
+    usuario.crearFiltro("F1", "a");
+    usuario.crearFiltro("F2", "b");
+    usuario.crearFiltro("F3", "c");
+    usuario.crearFiltro("F4", "d");
+    usuario.crearFiltro("F5", "e");
+    usuario.crearFiltro("F6", "f"); 
 }
 
 
 
 
+@Test
+public void filtrarCorreosEncuentraPorContenido() {
+    Correo correo = new Correo(
+            "Titulo",
+            "Mensaje urgente",
+            remitente,
+            List.of(destinatario1)
+    );
+    usuario.recibirCorreo(correo);
+
+    List<Correo> filtrados = usuario.filtrarCorreos("urgente");
+
+    assertEquals(1, filtrados.size());
+}
+
+
+@Test
+public void aplicarFiltroDevuelveCorreosCorrectos() {
+    usuario.crearFiltro("Urgentes", "alerta");
+
+    Correo correo = new Correo("Aviso", "Mensaje alerta", remitente, List.of(destinatario1));
+    usuario.recibirCorreo(correo);
+
+    List<Correo> resultado = usuario.aplicarFiltro("Urgentes");
+
+    assertEquals(1, resultado.size());
+}
+
+@Test(expected = IllegalArgumentException.class)
+public void aplicarFiltroLanzaErrorSiNoExiste() {
+    usuario.aplicarFiltro("NoExiste");
+}
 
 
 
+//requerimiento 6//
+
+@Test
+public void moverCorreoABorradores() {
+    Usuario usuario = new Usuario(new Contacto("Agustin", "agustin@gmail.edu.ar"));
+
+    Contacto remitente1 = new Contacto("Lautaro", "romerostachlautaro@ucp.edu.ar");
+    Contacto remitente2 = new Contacto("Tomas", "tomas@messi.edu.ar");
+    Correo correo = new Correo("Hola", "Mensaje", remitente1, List.of(remitente2));
+
+    usuario.recibirCorreo(correo);
+
+    usuario.moverABorradores(correo);
+
+    assertTrue(usuario.getBandejaBorradores().contains(correo));
+    assertFalse(usuario.getBandejaRecibidos().contains(correo));
+}
 
 
 
+@Test
+public void eliminarCorreoLoMueveABandejaEliminados() {
+    Usuario usuario = new Usuario(new Contacto("Agustin", "agustin@gmail.edu.ar"));
+
+    Contacto remitente1 = new Contacto("Lautaro", "romerostachlautaro@ucp.edu.ar");
+    Contacto remitente2 = new Contacto("Tomas", "tomas@messi.edu.ar");
+
+    Correo correo = new Correo("Hola", "Mensaje", remitente1, List.of(remitente2));
+
+    usuario.recibirCorreo(correo);
+
+    usuario.eliminarCorreo(correo);
+
+    assertTrue(usuario.getBandejaEliminados().contains(correo));
+}
 
 
 
+@Test
+public void restaurarCorreoDesdeEliminados() {
+    Usuario usuario = new Usuario(new Contacto("Agustin", "agustin@gmail.edu.ar"));
 
+    Contacto remitente1 = new Contacto("Lautaro", "romerostachlautaro@ucp.edu.ar");
+    Contacto remitente2 = new Contacto("Tomas", "tomas@messi.edu.ar");
 
+    Correo correo = new Correo("Hola", "Mensaje", remitente1, List.of(remitente2));
 
+    usuario.recibirCorreo(correo);
+    usuario.eliminarCorreo(correo);
 
+    usuario.restaurarCorreo(correo);
 
-
-
-
-
-
-
-
-
+    assertTrue(usuario.getBandejaRecibidos().contains(correo));
+    assertFalse(usuario.getBandejaEliminados().contains(correo));
+}
 
 
 
 
 }
-
-

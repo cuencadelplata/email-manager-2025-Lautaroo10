@@ -41,7 +41,7 @@ public class GestorCorreo {
 
     //Eliminar contacto
     public void eliminarContacto(String email){
-        contactos.removeIf(contactoEliminar -> contactoEliminar.getEmail().equalsIgnoreCase(email));
+    contactos.removeIf(contactoEliminar -> contactoEliminar.getEmail().equalsIgnoreCase(email));
     }
 
     public void enviarCorreo(Correo correo) {

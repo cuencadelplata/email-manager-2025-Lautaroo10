@@ -79,28 +79,81 @@ public class GestorCorreoTest {
 
 
 
-    @Test
-    public void sePuedeEliminarContactoPorEmail() {
-        Contacto contacto = new Contacto("Pedro", "pedro@gmail.com");
-        gestor.agregarContacto(contacto);
+    @Test(expected = IllegalArgumentException.class)
+public void noSePuedeAgregarContactoNull() {
+    gestor.agregarContacto(null);
+}
 
-        gestor.eliminarContacto("pedro@gmail.com");
 
-        assertTrue(gestor.getContactos().isEmpty());
+
+@Test(expected = IllegalArgumentException.class)
+public void noSePuedeAgregarContactoDuplicado() {
+    Contacto c1 = new Contacto("Juan", "juan@gmail.com");
+    gestor.agregarContacto(c1);
+
+    Contacto c2 = new Contacto("Pedro", "juan@gmail.com"); // mismo email
+    gestor.agregarContacto(c2);
+}
+
+
+
+@Test(expected = IllegalArgumentException.class)
+public void editarContactoInexistenteLanzaExcepcion() {
+    gestor.editarContacto("noexiste@gmail.com", "Nuevo", "nuevo@gmail.com");
+}
+
+
+
+@Test
+public void eliminarContactoExistente() {
+    Contacto c = new Contacto("Luis", "luis@gmail.com");
+    gestor.agregarContacto(c);
+
+    gestor.eliminarContacto("luis@gmail.com");
+
+    assertTrue(gestor.getContactos().isEmpty());
+}
+
+
+
+@Test
+public void eliminarContactoInexistenteNoRompe() {
+    gestor.eliminarContacto("noexiste@gmail.com");
+
+    assertTrue(gestor.getContactos().isEmpty());
+}
+
+
+@Test
+public void editarNombreYEmailDeContacto() {
+    Contacto c = new Contacto("Ana", "ana@gmail.com");
+    gestor.agregarContacto(c);
+
+    gestor.editarContacto("ana@gmail.com", "Ana Nuevo", "nuevo@gmail.com");
+
+    assertEquals("Ana Nuevo", c.getNombre());
+    assertEquals("nuevo@gmail.com", c.getEmail());
 }
 
 
     @Test
-    public void sePuedeEditarContactoExistente() {
-        Contacto contacto = new Contacto("Juan", "juan@gmail.com");
-        gestor.agregarContacto(contacto);
+    public void buscarCorreoPorTexto() {
+        Contacto remitente = new Contacto("Sego", "sego@gmail.com");
+        Contacto dest1 = new Contacto("Pit", "pituqui@gmail.com");
+        Contacto dest2 = new Contacto("Sanfer", "sanfer@gmail.com");
 
-        gestor.editarContacto("juan@gmail.com", "Juanito", "nuevojuan@gmail.com");
+        Usuario usuario = new Usuario(new Contacto("Laucha", "lauchita@gmail.com"));
 
-        assertEquals("Juanito", contacto.getNombre());
-        assertEquals("nuevojuan@gmail.com", contacto.getEmail());
-}
+        Correo correo1 = new Correo("Reunión", "No te olvides la necar", remitente, List.of(dest1));
+        Correo correo2 = new Correo("Recordatorio", "Traer birra", remitente, List.of(dest2));
 
+        usuario.recibirCorreo(correo1);
+        usuario.recibirCorreo(correo2);
+
+        List<Correo> resultado = usuario.buscarEnBandejaEntrada("Reunión");
+
+        assertEquals(1, resultado.size());
+    }
 
 
 }

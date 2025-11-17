@@ -31,11 +31,4 @@ public class Correo {
     public List<Contacto> getDestinatarios() {
         return destinatarios;
     }
-
-
-    
-
-
-
-
 }
