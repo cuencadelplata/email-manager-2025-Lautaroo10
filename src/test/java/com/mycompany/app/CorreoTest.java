@@ -1,6 +1,7 @@
 package com.mycompany.app;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -24,4 +25,25 @@ public class CorreoTest {
         assertTrue(c.getDestinatarios().contains(destinatario1));
         assertTrue(c.getDestinatarios().contains(destinatario1));
     }
+
+
+    //Requerimiento 8//
+    @Test
+    public void correoPuedeMarcarseComoLeidoYNoLeido() {
+        Contacto remitente = new Contacto("Agustin", "agustin@gmail.com");
+        Contacto destino = new Contacto("Lautaro", "lautaro@gmail.com");
+        Correo correo = new Correo("juntada", "trae para tomar", remitente, List.of(destino));
+
+    
+        assertFalse(correo.estaLeido());
+
+    
+        correo.marcarComoLeido();
+        assertTrue(correo.estaLeido());
+
+
+        correo.marcarComoNoLeido();
+        assertFalse(correo.estaLeido());
+    }
+
 }

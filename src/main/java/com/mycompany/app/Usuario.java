@@ -160,8 +160,34 @@ public void restaurarCorreo(Correo correo) {
     moverCorreo(bandejaEliminados, bandejaRecibidos, correo);
 }
 
-
+// Guardar un borrador automáticamente
+public void guardarBorrador(Correo correo) {
+    if (correo == null) {
+        throw new IllegalArgumentException("El correo no puede ser null.");
+    }
+    bandejaBorradores.add(correo);
 }
 
+// Editar un borrador existente
+public void editarBorrador(Correo borrador, String nuevoAsunto, String nuevoContenido) {
+    if (!bandejaBorradores.contains(borrador)) {
+        throw new IllegalArgumentException("El borrador no existe.");
+    }
+    if (nuevoAsunto != null && !nuevoAsunto.isEmpty()) {
+        borrador.setAsunto(nuevoAsunto);
+    }
+    if (nuevoContenido != null && !nuevoContenido.isEmpty()) {
+        borrador.setContenido(nuevoContenido);
+    }
+}
 
+// Enviar un borrador
+public void enviarBorrador(Correo borrador) {
+    if (!bandejaBorradores.contains(borrador)) {
+        throw new IllegalArgumentException("El borrador no existe.");
+    }
+    enviarCorreo(borrador);           // lo enviamos
+    bandejaBorradores.remove(borrador); // lo removemos de borradores
+}
 
+}
