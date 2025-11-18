@@ -50,54 +50,95 @@ public class ModificarContactoTest {
         gestor.agregarContacto(contacto1);
     }
 
-    //Editar contacto
-    @Test
-    public void editarContacto() {
-        // Crear y agregar contacto
-        Contacto contacto = new Contacto("Agustin", "agustin@gmail.com");
-        gestor.agregarContacto(contacto);
+@Test
+public void editarContacto_CambiaNombreYEmail() {
+    Contacto contacto = new Contacto("Agustin", "agustin@gmail.com");
+    gestor.agregarContacto(contacto);
 
-        // Editar nombre y email
-        gestor.editarContacto("agustin@gmail.com", "Agus", "agus@gmail.com");
+    gestor.editarContacto("agustin@gmail.com", "Agus", "agus@gmail.com");
 
-        Contacto editado = gestor.getContactos().get(0);
-        assertEquals("Agus", editado.getNombre());
-        assertEquals("agus@gmail.com", editado.getEmail());
-    }
+    Contacto editado = gestor.getContactos().get(0);
+    assertEquals("Agus", editado.getNombre());
+    assertEquals("agus@gmail.com", editado.getEmail());
+}
 
-    @Test(expected = IllegalArgumentException.class)
-    public void editarContactoNoExistenteLanzaExcepcion() {
-        // Intentar editar un contacto que no existe
-        gestor.editarContacto("noexiste@gmail.com", "Nombre", "email@gmail.com");
-    }
+@Test
+public void editarContactoSoloNombre_NoModificaEmail() {
+    Contacto contacto = new Contacto("Agustin", "agustin@gmail.com");
+    gestor.agregarContacto(contacto);
 
-    //Eliminar contacto
-    @Test
-    public void eliminarContacto() {
-        Contacto contacto1 = new Contacto("Agustin", "agustin@gmail.com");
-        Contacto contacto2 = new Contacto("Juan", "juan@gmail.com");
+    gestor.editarContacto("agustin@gmail.com", "Agus", null); // nuevoEmail = null
 
-        gestor.agregarContacto(contacto1);
-        gestor.agregarContacto(contacto2);
+    Contacto editado = gestor.getContactos().get(0);
+    assertEquals("Agus", editado.getNombre());
+    assertEquals("agustin@gmail.com", editado.getEmail());
+}
 
-        // Eliminar contacto1
-        gestor.eliminarContacto("agustin@gmail.com");
+@Test
+public void editarContactoSoloEmail_NoModificaNombre() {
+    Contacto contacto = new Contacto("Agustin", "agustin@gmail.com");
+    gestor.agregarContacto(contacto);
 
-        assertEquals(1, gestor.getContactos().size());
-        assertFalse(gestor.getContactos().contains(contacto1));
-        assertTrue(gestor.getContactos().contains(contacto2));
-    }
+    gestor.editarContacto("agustin@gmail.com", null, "nuevo@gmail.com"); // nuevoNombre = null
 
-    @Test
-    public void eliminarContactoNoExistenteNoHaceNada() {
-        Contacto contacto = new Contacto("Agustin", "agustin@gmail.com");
-        gestor.agregarContacto(contacto);
+    Contacto editado = gestor.getContactos().get(0);
+    assertEquals("Agustin", editado.getNombre());
+    assertEquals("nuevo@gmail.com", editado.getEmail());
+}
 
-        // Intentar eliminar un email que no existe
-        gestor.eliminarContacto("noexiste@gmail.com");
+@Test
+public void editarContactoIgnoraStringsVacios() {
+    Contacto contacto = new Contacto("Agustin", "agustin@gmail.com");
+    gestor.agregarContacto(contacto);
 
-        // La lista sigue con el contacto original
-        assertEquals(1, gestor.getContactos().size());
-        assertTrue(gestor.getContactos().contains(contacto));
-    }
+    gestor.editarContacto("AGUSTIN@gmail.com", "", ""); // prueba equalsIgnoreCase + isEmpty
+
+    Contacto editado = gestor.getContactos().get(0);
+    assertEquals("Agustin", editado.getNombre());       // no cambia
+    assertEquals("agustin@gmail.com", editado.getEmail()); // no cambia
+}
+
+@Test(expected = IllegalArgumentException.class)
+public void editarContactoNoExistenteLanzaExcepcion() {
+    gestor.editarContacto("noexiste@gmail.com", "Nombre", "email@gmail.com");
+}
+
+// ------------------------- ELIMINAR CONTACTO -------------------------
+
+@Test
+public void eliminarContacto_ExistenteLoRemueve() {
+    Contacto contacto1 = new Contacto("Agustin", "agustin@gmail.com");
+    Contacto contacto2 = new Contacto("Juan", "juan@gmail.com");
+
+    gestor.agregarContacto(contacto1);
+    gestor.agregarContacto(contacto2);
+
+    gestor.eliminarContacto("agustin@gmail.com");
+
+    assertEquals(1, gestor.getContactos().size());
+    assertFalse(gestor.getContactos().contains(contacto1));
+    assertTrue(gestor.getContactos().contains(contacto2));
+}
+
+@Test
+public void eliminarContactoConMayusculasUsaEqualsIgnoreCase() {
+    Contacto contacto = new Contacto("Agustin", "agustin@gmail.com");
+    gestor.agregarContacto(contacto);
+
+    gestor.eliminarContacto("AGUSTIN@GMAIL.COM");
+
+    assertTrue(gestor.getContactos().isEmpty());
+}
+
+@Test
+public void eliminarContactoNoExistenteNoHaceNada() {
+    Contacto contacto = new Contacto("Agustin", "agustin@gmail.com");
+    gestor.agregarContacto(contacto);
+
+    gestor.eliminarContacto("noexiste@gmail.com");
+
+    assertEquals(1, gestor.getContactos().size());
+    assertTrue(gestor.getContactos().contains(contacto));
+}
+
 }

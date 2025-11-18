@@ -9,10 +9,7 @@ public class Correo {
     private Contacto remitente;
     private List<Contacto> destinatarios;
     private boolean leido;
-
-
-
-
+    private boolean favorito; 
 
     public Correo(String asunto, String contenido, Contacto remitente, List<Contacto> destinatarios) {
         this.asunto = asunto;
@@ -58,4 +55,15 @@ public class Correo {
         return leido;
     }
 
+    public void marcarComoFavorito() {
+        this.favorito = true;
+    }
+
+    public void marcarComoNoFavorito() {
+        this.favorito = false;
+    }
+
+    public boolean esFavorito() {
+        return favorito;
+    }
 }

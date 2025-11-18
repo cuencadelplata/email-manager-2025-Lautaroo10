@@ -170,7 +170,49 @@ public void aplicarFiltroLanzaErrorSiNoExiste() {
     usuario.aplicarFiltro("NoExiste");
 }
 
+@Test
+public void filtrarCorreosEncuentraPorAsunto() {
+    Correo correo = new Correo("Reunion urgente, tengo hambre", "Loco porfavor compren algo para comer", remitente, List.of(destinatario1));
+    usuario.recibirCorreo(correo);
 
+    List<Correo> filtrados = usuario.filtrarCorreos("reunion");
+
+    assertEquals(1, filtrados.size());
+    assertTrue(filtrados.contains(correo));
+}
+
+@Test
+public void filtrarCorreosEncuentraPorRemitenteEmail() {
+    Correo correo = new Correo("Prueba", "AVADA KEDAVRA!", new Contacto("Tom Riddle", "LordVoldemort@mail.com"), List.of(destinatario1));
+    usuario.recibirCorreo(correo);
+
+    List<Correo> filtrados = usuario.filtrarCorreos("LordVoldemort@mail.com");
+
+    assertEquals(1, filtrados.size());
+}
+
+
+@Test
+public void aplicarFiltroConTextoVacioDevuelveListaVacia() {
+    usuario.crearFiltro("FiltroVacio", "");
+
+    Correo correo = new Correo("Hola", "Mensaje", remitente, List.of(destinatario1));
+    usuario.recibirCorreo(correo);
+
+    List<Correo> resultado = usuario.aplicarFiltro("FiltroVacio");
+
+    assertTrue(resultado.isEmpty());
+}
+
+@Test
+public void filtrarCorreosSinCoincidenciasDevuelveListaVacia() {
+    Correo correo = new Correo("Asunto", "Contenido", remitente, List.of(destinatario1));
+    usuario.recibirCorreo(correo);
+
+    List<Correo> filtrados = usuario.filtrarCorreos("Goku");
+
+    assertTrue(filtrados.isEmpty());
+}
 
 //requerimiento 6//
 
@@ -229,7 +271,7 @@ public void restaurarCorreoDesdeEliminados() {
 }
 
 
-
+//Requerimiento 7//
 @Test
     public void testGuardarEditarYEnviarBorrador() {
         Contacto remitente = new Contacto("Agustin", "a@mail.com");
@@ -240,23 +282,23 @@ public void restaurarCorreoDesdeEliminados() {
         Usuario usuario = new Usuario(remitente);
         Correo correo = new Correo("Facu", "Sanfer ponete las pilas que recursamos", remitente, destinatarios);
 
-        // Guardar borrador
+        
         usuario.guardarBorrador(correo);
         assertEquals(1, usuario.getBandejaBorradores().size());
         assertEquals("Facu", usuario.getBandejaBorradores().get(0).getAsunto());
 
-        // Editar borrador
+    
         usuario.editarBorrador(correo, "Dale!", "Dale que regularizamos sanfer");
         assertEquals("Dale!", usuario.getBandejaBorradores().get(0).getAsunto());
         assertEquals("Dale que regularizamos sanfer", usuario.getBandejaBorradores().get(0).getContenido());
 
-        // Enviar borrador
+        
         usuario.enviarBorrador(correo);
         assertEquals(0, usuario.getBandejaBorradores().size());
         assertEquals(1, usuario.getBandejaEnviados().size());
         assertEquals("Dale!", usuario.getBandejaEnviados().get(0).getAsunto());
 
-        // Casos de error
+        
         assertThrows(IllegalArgumentException.class, () -> usuario.editarBorrador(correo, "X", "Y"));
         assertThrows(IllegalArgumentException.class, () -> usuario.enviarBorrador(correo));
         assertThrows(IllegalArgumentException.class, () -> usuario.guardarBorrador(null));
